@@ -1,0 +1,80 @@
+{
+  "name": "noleak",
+  "version": "0.1.2",
+  "description": "Pre-publish security gate for packages. Scans 10 ecosystems (npm, PyPI, Docker, Maven, etc.) for source maps, credentials, and sensitive files before they ship.",
+  "type": "module",
+  "bin": {
+    "noleak": "./bin/noleak.js",
+    "audit-gate": "./bin/noleak.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "security",
+    "audit",
+    "npm",
+    "publish",
+    "pre-publish",
+    "source-map",
+    "credentials",
+    "leak-prevention",
+    "noleak",
+    "docker",
+    "pypi",
+    "maven",
+    "nuget",
+    "crates",
+    "vscode"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@anthropic-ai/sdk": ">=0.30.0",
+    "openai": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    },
+    "openai": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "cosmiconfig": "^9.0.1",
+    "npm-packlist": "^10.0.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}

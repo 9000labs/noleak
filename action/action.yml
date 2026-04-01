@@ -1,0 +1,76 @@
+name: 'Audit Gate'
+description: 'Pre-publish security gate for npm packages. Catches source maps, credentials, and sensitive files.'
+author: 'noleak'
+
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  path:
+    description: 'Path to the package directory'
+    required: false
+    default: '.'
+  fail-on:
+    description: 'Minimum severity to fail: block | warn | info'
+    required: false
+    default: 'block'
+  output:
+    description: 'Output format: console | json'
+    required: false
+    default: 'console'
+
+outputs:
+  verdict:
+    description: 'Scan result: PASS, WARN, or BLOCK'
+  findings-count:
+    description: 'Total number of findings'
+  block-count:
+    description: 'Number of blocking findings'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install noleak
+      shell: bash
+      run: npm install -g noleak
+
+    - name: Run audit
+      id: audit
+      shell: bash
+      run: |
+        set +e
+        OUTPUT=$(noleak npm "${{ inputs.path }}" --fail-on "${{ inputs.fail-on }}" --output json 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        echo "$OUTPUT"
+
+        # Parse JSON output for GitHub Action outputs
+        VERDICT=$(echo "$OUTPUT" | jq -r '.verdict // "ERROR"' 2>/dev/null || echo "ERROR")
+        FINDINGS=$(echo "$OUTPUT" | jq '.findings | length' 2>/dev/null || echo "0")
+        BLOCKS=$(echo "$OUTPUT" | jq '[.findings[] | select(.severity=="block")] | length' 2>/dev/null || echo "0")
+
+        echo "verdict=$VERDICT" >> $GITHUB_OUTPUT
+        echo "findings-count=$FINDINGS" >> $GITHUB_OUTPUT
+        echo "block-count=$BLOCKS" >> $GITHUB_OUTPUT
+
+        # Create step summary
+        echo "## Audit Gate Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Verdict: $VERDICT**" >> $GITHUB_STEP_SUMMARY
+        echo "- Findings: $FINDINGS" >> $GITHUB_STEP_SUMMARY
+        echo "- Blocking: $BLOCKS" >> $GITHUB_STEP_SUMMARY
+
+        if [ "$EXIT_CODE" -eq 2 ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Blocking Issues" >> $GITHUB_STEP_SUMMARY
+          echo "$OUTPUT" | jq -r '.findings[] | select(.severity=="block") | "- **\(.filePath)**: \(.message)"' 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+        fi
+
+        exit $EXIT_CODE

@@ -1,0 +1,54 @@
+# Source code (dist/ is published, src/ is not)
+src/
+test/
+mcp/
+
+# Config / Build tooling
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+.noleakrc.json
+.editorconfig
+
+# Git / CI
+.git/
+.github/
+.gitignore
+.gitlab-ci.yml
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+*.code-workspace
+
+# Environment / Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / Cache
+*.log
+coverage/
+.nyc_output/
+.eslintcache
+.cache/
+.noleak/
+
+# Package tarballs
+*.tgz
+
+# Action (separate distribution)
+action/
+
+# Dev files
+CONTRIBUTING.md
+CHANGELOG.md
+AGENTS.md
+CLAUDE.md
+.claude/
